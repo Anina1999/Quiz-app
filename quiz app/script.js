@@ -7,6 +7,7 @@ const scoreContainer = document.getElementById('score-container');
 const progressElement = document.getElementById('progress');
 const timerElement = document.getElementById('timer');
 const finalScoreElement = document.getElementById('final-score');
+const feedbackEmoji = document.getElementById('feedback-emoji');
 
 const correctSound = document.getElementById('correct-sound');
 const wrongSound = document.getElementById('wrong-sound');
@@ -91,8 +92,10 @@ function selectAnswer(e) {
     if(correct) {
         score++;
         correctSound.play();
+        showFeedbackEmoji("👍");
     } else {
         wrongSound.play();
+        showFeedbackEmoji("👎");
     }
 
     setStatusClass(document.body, correct);
@@ -111,7 +114,7 @@ function selectAnswer(e) {
         answerButtonsElement.classList.add('hide');
         nextButton.classList.add('hide');
         scoreContainer.classList.add('hide'); 
-        finalScoreElement.innerText = `Final score: ${score} / ${shuffledQuestions.length}`;
+        finalScoreElement.innerHTML = `<span class="emoji">🎉</span> Final score: ${score} / ${shuffledQuestions.length} <span class="emoji">🎉</span>`;
         finalScoreElement.classList.remove('hide');
         finalScoreElement.classList.add('animate-final-score'); // Добави клас за анимация
 
@@ -166,6 +169,17 @@ function enableAnswers() {
     Array.from(answerButtonsElement.children).forEach(button => {
         button.disabled = false;
     });
+}
+
+function showFeedbackEmoji(emoji) {
+    feedbackEmoji.innerText = emoji;
+    feedbackEmoji.classList.remove('hide');
+    feedbackEmoji.classList.add('animate-emoji');
+
+    setTimeout(() => {
+        feedbackEmoji.classList.add('hide');
+        feedbackEmoji.classList.remove('animate-emoji');
+    }, 1200);
 }
 
 const questions = [
@@ -232,4 +246,5 @@ const questions = [
             { text: 'Bungalow', correct: false }
         ]
     }
+
 ];
