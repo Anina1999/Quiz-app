@@ -27,7 +27,7 @@ A simple quiz application built with **JavaScript**, **HTML**, and **CSS**. Crea
 
 ## Here's what the quiz looks like in action:
 
-
+![example of right answer](screenshot/quiz-app-screenshot.jpg)
 
 ## LICENSE
 
