@@ -25,9 +25,13 @@ A simple quiz application built with **JavaScript**, **HTML**, and **CSS**. Crea
 * Dynamically updating the DOM
 * Implementing visual feedback and basic UX elements
 
-## Here's what the quiz looks like in action:
+## Here is an example:
 
 ![example of right answer](screenshot/quiz-app-screenshot.jpg)
+
+## Here's what the quiz looks like in action:
+
+[https://anina1999.github.io/Quiz-app/](https://anina1999.github.io/Quiz-app/)
 
 ## LICENSE
 
