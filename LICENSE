@@ -1,21 +1,102 @@
-MIT License
+Copyright (c) 2025-2026 Anina Angelova. All rights reserved.
+Авторско право (c) 2025-2026 Анина Ангелова. Всички права запазени.
 
-Copyright (c) 2025 Anina Angelova
+================================================================================
+ENGLISH
+================================================================================
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+ALL RIGHTS RESERVED
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This software and its source code, documentation, design, illustrations and
+sounds (the "Work") are the intellectual property of the author and are
+protected by copyright law.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+The Work is published on GitHub so that it can be viewed and evaluated. Making
+it publicly visible does not grant any licence to use it.
+
+WITHOUT THE PRIOR WRITTEN PERMISSION OF THE AUTHOR, IT IS NOT PERMITTED TO:
+
+  - use the Work, in whole or in part, for any purpose, whether commercial or
+    non-commercial, including use in a school or other educational institution;
+  - copy, reproduce, modify, adapt or translate the Work or any part of it;
+  - distribute, publish, sublicense, sell, rent or otherwise make the Work
+    available to third parties;
+  - create derivative works based on the Work;
+  - remove or alter this notice or the attribution of authorship.
+
+VIEWING the source code on GitHub and the use of GitHub's own functions, to the
+extent required by the GitHub Terms of Service for public repositories, are
+permitted.
+
+To request permission, contact the author through the GitHub profile
+https://github.com/Anina1999
+
+PREVIOUSLY PUBLISHED VERSIONS
+
+Until 6 September 2026 this project was published under the MIT Licence. That
+permission cannot be withdrawn for versions already obtained under it: anyone
+who received a copy of the Work under the MIT Licence retains the rights that
+licence granted, for that copy. This notice applies to the Work as published
+from the above date onwards.
+
+NO WARRANTY
+
+THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE WORK OR THE USE OR OTHER DEALINGS IN THE WORK.
+
+================================================================================
+БЪЛГАРСКИ
+================================================================================
+
+ВСИЧКИ ПРАВА ЗАПАЗЕНИ
+
+Това приложение и неговият изходен код, документация, дизайн, илюстрации и
+звуци („Произведението“) са интелектуална собственост на автора и са защитени
+от Закона за авторското право и сродните му права.
+
+Произведението е публикувано в GitHub, за да може да бъде разгледано и
+оценено. Публичната видимост НЕ представлява предоставяне на лиценз за
+ползване.
+
+БЕЗ ПРЕДВАРИТЕЛНО ПИСМЕНО РАЗРЕШЕНИЕ ОТ АВТОРА НЕ СЕ РАЗРЕШАВА:
+
+  - ползване на Произведението, изцяло или отчасти, за каквато и да е цел —
+    търговска или нетърговска, включително ползване в училище или друга
+    образователна институция;
+  - копиране, възпроизвеждане, променяне, преработване или превеждане на
+    Произведението или на част от него;
+  - разпространяване, публикуване, преотстъпване, продажба, отдаване под наем
+    или предоставяне на Произведението на трети лица по какъвто и да е начин;
+  - създаване на производни произведения въз основа на Произведението;
+  - премахване или изменяне на това известие или на посочването на авторството.
+
+РАЗГЛЕЖДАНЕТО на изходния код в GitHub и ползването на собствените функции на
+GitHub, доколкото това се изисква от Условията за ползване на GitHub за
+публични хранилища, са разрешени.
+
+За искане на разрешение се свържете с автора през профила в GitHub:
+https://github.com/Anina1999
+
+ПО-РАНО ПУБЛИКУВАНИ ВЕРСИИ
+
+До 6 септември 2026 г. проектът беше публикуван под лиценз MIT. Това
+разрешение не може да бъде оттеглено за вече получени под него версии: всеки,
+който е получил копие на Произведението под лиценз MIT, запазва правата,
+които този лиценз му е дал, за съответното копие. Настоящото известие се
+отнася за Произведението, публикувано от посочената дата нататък.
+
+БЕЗ ГАРАНЦИИ
+
+ПРОИЗВЕДЕНИЕТО СЕ ПРЕДОСТАВЯ ВЪВ ВИДА, В КОЙТО Е, БЕЗ КАКВАТО И ДА Е ИЗРИЧНА
+ИЛИ ПОДРАЗБИРАЩА СЕ ГАРАНЦИЯ, ВКЛЮЧИТЕЛНО, НО НЕ САМО, ГАРАНЦИИ ЗА ГОДНОСТ ЗА
+ПРОДАЖБА, ЗА ПРИГОДНОСТ ЗА ОПРЕДЕЛЕНА ЦЕЛ И ЗА НЕНАРУШАВАНЕ НА ПРАВА. АВТОРЪТ
+НЕ НОСИ ОТГОВОРНОСТ ЗА КАКВИТО И ДА Е ПРЕТЕНЦИИ, ВРЕДИ ИЛИ ДРУГИ ЗАДЪЛЖЕНИЯ,
+ПРОИЗТИЧАЩИ ОТ ИЛИ ВЪВ ВРЪЗКА С ПРОИЗВЕДЕНИЕТО ИЛИ С ПОЛЗВАНЕТО МУ.
+
+================================================================================
+
+При различия в тълкуването между двата текста меродавен е българският.
+In case of any discrepancy between the two texts, the Bulgarian text prevails.
