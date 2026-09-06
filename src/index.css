@@ -1,0 +1,862 @@
+/* =============================================================================
+   QUIZ APP — базов стил
+
+   Решенията тук са водени от това, че потребителите са деца на 6–10 години,
+   често на училищен таблет:
+     * големи цели за докосване (минимум 56px, не 30px);
+     * видим фокус от клавиатура — никога outline: none без заместител;
+     * контраст поне 4.5:1 спрямо WCAG AA;
+     * вярно/грешно се показва с ИКОНА И ТЕКСТ, не само с цвят;
+     * шрифтът е системен, не от Google Fonts — така няма заявка към трета
+       страна от браузъра на дете (по-чисто спрямо GDPR) и няма забавяне.
+   ============================================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --font: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+
+    --ink: #0f172a;
+    --ink-soft: #475569;
+    --line: #cbd5e1;
+    --surface: #ffffff;
+    --bg: #eef2f7;
+
+    --brand: #1d4ed8;
+    --brand-dark: #1e3a8a;
+    --brand-soft: #dbeafe;
+
+    --ok: #15803d;
+    --ok-soft: #dcfce7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --warn: #a16207;
+    --warn-soft: #fef3c7;
+
+    --radius: 14px;
+    --shadow: 0 2px 4px rgb(15 23 42 / 8%), 0 8px 24px rgb(15 23 42 / 8%);
+
+    /* Не по-малко от 56px: пръст на седемгодишно дете върху таблет. */
+    --tap: 56px;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family: var(--font);
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+    line-height: 1.2;
+    margin: 0 0 0.5em;
+}
+
+h1 {
+    font-size: clamp(1.6rem, 1.2rem + 2vw, 2.4rem);
+}
+h2 {
+    font-size: clamp(1.3rem, 1.1rem + 1vw, 1.7rem);
+}
+
+p {
+    margin: 0 0 1em;
+}
+
+/* --- Фокус от клавиатура ---------------------------------------------------
+   Оригиналното приложение имаше `outline: none` без заместител, което правеше
+   работата с Tab невъзможна. Тук фокусът е нарочно ярък и дебел. */
+:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+/* --- Оформление ------------------------------------------------------------ */
+.page {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+    flex: 1;
+}
+
+.page--narrow {
+    max-width: 520px;
+}
+
+.card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: clamp(16px, 4vw, 32px);
+}
+
+.stack > * + * {
+    margin-top: 16px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.row--between {
+    justify-content: space-between;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.muted {
+    color: var(--ink-soft);
+}
+
+.small {
+    font-size: 0.9rem;
+}
+
+/* --- Приложна лента -------------------------------------------------------- */
+.appbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+
+.appbar__inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.appbar__title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+/* --- Бутони ---------------------------------------------------------------- */
+.btn {
+    font: inherit;
+    font-weight: 600;
+    min-height: var(--tap);
+    padding: 12px 22px;
+    border-radius: var(--radius);
+    border: 2px solid transparent;
+    background: var(--brand);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--brand-dark);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.btn--secondary {
+    background: var(--surface);
+    color: var(--brand-dark);
+    border-color: var(--brand);
+}
+
+.btn--secondary:hover:not(:disabled) {
+    background: var(--brand-soft);
+}
+
+.btn--quiet {
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--line);
+    min-height: 44px;
+    padding: 8px 14px;
+    font-weight: 500;
+}
+
+.btn--quiet:hover:not(:disabled) {
+    background: var(--bg);
+    color: var(--ink);
+}
+
+.btn--danger {
+    background: var(--surface);
+    color: var(--bad);
+    border-color: var(--bad);
+}
+
+.btn--danger:hover:not(:disabled) {
+    background: var(--bad-soft);
+}
+
+.btn--big {
+    font-size: 1.3rem;
+    min-height: 72px;
+    padding: 16px 32px;
+}
+
+.btn--block {
+    width: 100%;
+}
+
+/* --- Формуляри -------------------------------------------------------------- */
+.field {
+    display: block;
+}
+
+.field__label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.field__hint {
+    display: block;
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin-top: 2px;
+}
+
+input,
+select,
+textarea {
+    font: inherit;
+    width: 100%;
+    min-height: var(--tap);
+    padding: 10px 14px;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--ink);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--brand);
+}
+
+textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+    width: 24px;
+    height: 24px;
+    min-height: 0;
+    accent-color: var(--brand);
+}
+
+/* --- Съобщения -------------------------------------------------------------- */
+.alert {
+    border-radius: 10px;
+    padding: 12px 16px;
+    border-left: 6px solid;
+    font-weight: 500;
+}
+
+.alert--error {
+    background: var(--bad-soft);
+    border-color: var(--bad);
+    color: #7f1d1d;
+}
+
+.alert--ok {
+    background: var(--ok-soft);
+    border-color: var(--ok);
+    color: #14532d;
+}
+
+.alert--info {
+    background: var(--warn-soft);
+    border-color: var(--warn);
+    color: #713f12;
+}
+
+/* --- Списъци/карти ---------------------------------------------------------- */
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tile {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.tile:hover {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+}
+
+.tile__title {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--brand-soft);
+    color: var(--brand-dark);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge--ok {
+    background: var(--ok-soft);
+    color: #14532d;
+}
+
+.badge--muted {
+    background: #e2e8f0;
+    color: var(--ink-soft);
+}
+
+/* --- Таблици ---------------------------------------------------------------- */
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 520px;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+}
+
+th {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+}
+
+/* --- Код за влизане --------------------------------------------------------- */
+.join-code {
+    font-family: 'Consolas', 'SFMono-Regular', monospace;
+    font-size: clamp(2rem, 1.5rem + 3vw, 3.2rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--brand-dark);
+    background: var(--brand-soft);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    display: inline-block;
+}
+
+.code-input {
+    font-family: 'Consolas', 'SFMono-Regular', monospace;
+    font-size: 2rem;
+    letter-spacing: 0.3em;
+    text-align: center;
+    text-transform: uppercase;
+    min-height: 72px;
+}
+
+/* --- Игра ------------------------------------------------------------------- */
+.quiz-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.progressbar {
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progressbar__fill {
+    height: 100%;
+    background: var(--brand);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.timer {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--brand-soft);
+    color: var(--brand-dark);
+}
+
+.timer--low {
+    background: var(--bad-soft);
+    color: var(--bad);
+}
+
+.question {
+    font-size: clamp(1.3rem, 1.1rem + 1.5vw, 2rem);
+    font-weight: 700;
+    margin: 20px 0;
+}
+
+/* Подсказката на учителя под въпроса — видима преди отговора.
+   Нарочно по-тиха от въпроса, за да не се чете вместо него. */
+.hint {
+    font-size: 1.05rem;
+    color: #713f12;
+    background: var(--warn-soft);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    margin: -8px 0 20px;
+}
+
+.answers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* На телефон две колони чупят дългите отговори — минаваме на една.
+   Оригиналният CSS нямаше нито едно media query. */
+@media (max-width: 620px) {
+    .answers {
+        grid-template-columns: 1fr;
+    }
+}
+
+.answer {
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 600;
+    min-height: 72px;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    border: 3px solid var(--brand);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+}
+
+.answer:hover:not(:disabled) {
+    background: var(--brand-soft);
+}
+
+.answer:disabled {
+    cursor: default;
+}
+
+/* Верният отговор се маркира с ✓ и думата "вярно", не само със зелено —
+   децата с цветна слепота също трябва да разберат какво е станало. */
+.answer--correct {
+    border-color: var(--ok);
+    background: var(--ok-soft);
+    color: #14532d;
+}
+
+.answer--wrong {
+    border-color: var(--bad);
+    background: var(--bad-soft);
+    color: #7f1d1d;
+}
+
+.answer--dim:disabled {
+    opacity: 0.5;
+}
+
+.answer__mark {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    width: 1.6em;
+    text-align: center;
+}
+
+.verdict {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+}
+
+.verdict__headline {
+    display: block;
+}
+
+/* Обяснението на учителя — по-леко от заглавието, за да не се сливат. */
+.verdict__explanation {
+    display: block;
+    margin-top: 6px;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.verdict--ok {
+    background: var(--ok-soft);
+    color: #14532d;
+}
+
+.verdict--bad {
+    background: var(--bad-soft);
+    color: #7f1d1d;
+}
+
+.verdict--timeout {
+    background: var(--warn-soft);
+    color: #713f12;
+}
+
+.verdict__emoji {
+    font-size: 2rem;
+}
+
+.result {
+    text-align: center;
+}
+
+.result__score {
+    font-size: clamp(2.4rem, 2rem + 4vw, 4rem);
+    font-weight: 800;
+    color: var(--brand-dark);
+    animation: pop 0.6s ease-out;
+}
+
+@keyframes pop {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Уважаваме системната настройка за намалено движение. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* --- Протокол от тест --------------------------------------------------------
+   Ползва се и на екран, и при печат. „Запази като PDF“ в прозореца за печат
+   дава готов документ с вярна кирилица — за разлика от PDF библиотеките, които
+   изискват вграждане на цял шрифт.
+
+   Целта при печат е ЕДНА страница за тест от 5–10 въпроса, затова мерките са
+   в точки и нарочно стегнати. */
+
+.report__head {
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.report__subject {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: -4px 0 14px;
+}
+
+.report__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 32px;
+    margin: 0;
+}
+
+.report__meta-row {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    min-width: 0;
+}
+
+/* Резултатът заема цял ред — той е най-важното число в документа. */
+.report__meta-row--wide {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    font-size: 1.1rem;
+}
+
+.report__meta dt {
+    font-weight: 400;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.report__meta dd {
+    margin: 0;
+    font-weight: 600;
+    min-width: 0;
+}
+
+.report__questions {
+    list-style: decimal;
+    padding-left: 1.6em;
+    margin: 0;
+}
+
+.report__q {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    break-inside: avoid; /* въпрос да не се разкъсва между две страници */
+}
+
+.report__prompt {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 2px;
+}
+
+.report__mark {
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+.report__q--ok .report__mark {
+    color: var(--ok);
+}
+
+.report__q:not(.report__q--ok) .report__mark {
+    color: var(--bad);
+}
+
+.report__answer {
+    margin: 0;
+}
+
+.report__time {
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+}
+
+.report__foot {
+    margin-top: 16px;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    break-inside: avoid;
+}
+
+/* Учител вляво, дата вдясно — както се подписва протокол на хартия. */
+.report__sign {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    color: var(--ink-soft);
+}
+
+/* Адресът на протокола: само за печат, пренася се изцяло. */
+.report__link {
+    display: none;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    word-break: break-all;
+    margin: 0;
+}
+
+@media print {
+    /* Лентата, бутоните и фонът не влизат в документа. */
+    .appbar,
+    .no-print,
+    .skip-link {
+        display: none !important;
+    }
+
+    /*
+     * Причината за празната последна страница: на екрана #root е висок поне
+     * 100vh, а .page е flex: 1 и се разтяга. При печат тази височина се мери
+     * спрямо страницата и изтласква съдържание отвъд нея. Затова тук
+     * оформлението се връща към обикновен поток.
+     */
+    html,
+    body {
+        background: #fff;
+        font-size: 10.5pt;
+        line-height: 1.35;
+        height: auto;
+        min-height: 0;
+    }
+
+    #root {
+        display: block;
+        min-height: 0;
+    }
+
+    .page {
+        max-width: none;
+        padding: 0;
+        flex: none;
+    }
+
+    .report__link {
+        display: block;
+    }
+
+    .report h1 {
+        font-size: 16pt;
+        margin-bottom: 2pt;
+    }
+
+    .report__subject {
+        font-size: 12pt;
+        margin: 0 0 8pt;
+    }
+
+    .report__meta {
+        gap: 3pt 24pt;
+    }
+
+    .report__meta-row--wide {
+        font-size: 11.5pt;
+        margin-top: 4pt;
+    }
+
+    .report__q {
+        padding: 5pt 0;
+        border-bottom: 1px solid #bbb;
+    }
+
+    /* Черно на бяло пести мастило и остава четимо на черно-бял принтер. */
+    .report__q--ok .report__mark,
+    .report__q:not(.report__q--ok) .report__mark {
+        color: #000;
+    }
+
+    .report__foot {
+        margin-top: 10pt;
+        padding-top: 6pt;
+    }
+
+    .report__foot p {
+        margin-bottom: 4pt;
+    }
+
+    .report__sign {
+        margin-top: 16pt;
+    }
+
+    /* Последният елемент без долен отстъп — иначе една излишна точка е
+       достатъчна, за да се роди втора страница. */
+    .report__sign,
+    .report:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    @page {
+        margin: 14mm;
+    }
+}
+
+/* --- Само за екранни четци --------------------------------------------------- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 18px;
+    z-index: 10;
+}
+
+.skip-link:focus {
+    left: 8px;
+    top: 8px;
+}
