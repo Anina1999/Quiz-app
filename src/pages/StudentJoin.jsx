@@ -1,11 +1,36 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import * as api from '../api/index.js';
 import { useStudent } from '../lib/student.jsx';
 import { errorText } from '../lib/supabase.js';
 import { classLabel } from '../lib/constants.js';
 import { useFeedback } from '../hooks/useFeedback.js';
 import { Feedback, Field, Loading } from '../components/ui.jsx';
+
+/**
+ * Стрелката назад — винаги горе вляво, на едно и също място.
+ *
+ * Къде води зависи от стъпката: от списъка с имената връща към кода, а от кода
+ * излиза към началния екран („Кой си ти?“). Затова е една, а не две — дете на
+ * седем години не разграничава „назад една стъпка“ от „назад в началото“, ако
+ * двете стоят на различни места и изглеждат различно.
+ *
+ * Размерът е на цял бутон (56px), а не текстова връзка: пръст върху таблет.
+ */
+function BackButton({ to, onClick, children }) {
+    if (to) {
+        return (
+            <Link to={to} className="btn btn--secondary">
+                ← {children}
+            </Link>
+        );
+    }
+    return (
+        <button type="button" className="btn btn--secondary" onClick={onClick}>
+            ← {children}
+        </button>
+    );
+}
 
 export default function StudentJoin() {
     const { student, ready, ensureSession, join } = useStudent();
@@ -47,6 +72,7 @@ export default function StudentJoin() {
     if (sessionError) {
         return (
             <div className="page page--narrow stack">
+                <BackButton to="/">Назад</BackButton>
                 <h1>Влизане в класа</h1>
                 <Feedback error={sessionError} />
                 <button type="button" className="btn" onClick={prepare}>
@@ -81,6 +107,21 @@ export default function StudentJoin() {
 
     return (
         <div className="page page--narrow stack">
+            {/* На първата стъпка води към „Кой си ти?“, на втората — обратно
+                към кода. Едно място, едно поведение. */}
+            {preview ? (
+                <BackButton
+                    onClick={() => {
+                        setPreview(null);
+                        feedback.clear();
+                    }}
+                >
+                    Друг код
+                </BackButton>
+            ) : (
+                <BackButton to="/">Назад</BackButton>
+            )}
+
             <h1>Влизане в класа</h1>
 
             <Feedback error={feedback.error} />
@@ -134,17 +175,6 @@ export default function StudentJoin() {
                             В този клас още няма добавени ученици. Кажи на учителя.
                         </p>
                     )}
-
-                    <button
-                        type="button"
-                        className="btn btn--quiet"
-                        onClick={() => {
-                            setPreview(null);
-                            feedback.clear();
-                        }}
-                    >
-                        ← Друг код
-                    </button>
                 </div>
             )}
         </div>
