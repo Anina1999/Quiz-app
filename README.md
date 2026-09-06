@@ -1,38 +1,149 @@
-# Quiz App
+# Quiz App — тестове за 1.–4. клас
 
-A simple quiz application built with **JavaScript**, **HTML**, and **CSS**. Created as a student project to practice core front-end development skills. I am learning how to work with the DOM, timers, dynamic content, and basic game logic in JavaScript.
+Образователен инструмент за класната стая. Учителят създава тестове по учебните
+предмети, децата ги решават на таблет или компютър, а резултатите и напредъкът
+по теми се събират автоматично.
 
-## Features
+Приложението започна като студентски проект с ванилен JavaScript. Втората
+версия добавя бекенд (Supabase), профили за учители и съхранение на резултати.
+Оригиналната версия е запазена в [`legacy/`](legacy/).
 
-* Randomized multiple-choice questions  
-* Countdown timer for each question  
-* Sound effects for correct and incorrect answers  
-* Progress tracking and final score summary
-* Visual feedback with emoji animations 
-* Fully responsive design
+## Защита на личните данни на децата
 
-## Technologies Used
+Това е основното решение в проекта: **в базата няма лични данни на деца.**
 
-* JavaScript (DOM manipulation, event handling, timers)
-* HTML5 & CSS3 (semantic layout and styling)
-* Audio API (`=<audio>` tag, playback controls)
+- Учениците се записват само с **псевдоним** и по избор номер в дневника
+  („Ученик 7“, „Мечо“, „№ 12“). Няма колони за име, фамилия, email или дата на
+  раждане — не защото не се попълват, а защото ги няма в схемата.
+- Кой псевдоним отговаря на кое дете знае само учителят, офлайн.
+- Децата **нямат акаунти**. Влизат с шестзначен код, който учителят пише на
+  дъската, и си избират псевдонима от списък.
+- Единственият профил с реални данни е този на учителя.
 
-## What i learned
+## Как работи
 
-* Working with JavaScript event listeners and buttons
-* Shuffling questions and managing user input
-* Creating timers using setInterval and clearInterval
-* Dynamically updating the DOM
-* Implementing visual feedback and basic UX elements
+| | Учител | Ученик |
+|---|---|---|
+| Влизане | email + парола | код на класа + избор на псевдоним |
+| Може | класове, ученици, тестове, въпроси, резултати | само публикуваните тестове за своя клас |
+| Достъп до базата | само до собствените си редове (RLS) | никакъв пряк — само през SQL функции |
 
-## Here is an example:
+Верните отговори **никога не се изпращат към браузъра на детето**. Оценяването
+става в базата (`submit_answer`), така че отговорът не може да се прочете от
+инструментите за разработчици.
 
-![example of right answer](screenshot/quiz-app-screenshot.jpg)
+## Технологии
 
-## Here's what the quiz looks like in action:
+- **React 19 + Vite** — ES модули, разделяне по слоеве
+- **Supabase** — PostgreSQL, Row Level Security, Auth (email за учители,
+  анонимни сесии за деца)
+- **Без външни шрифтове и CDN** — никаква заявка от браузъра на дете към трета
+  страна
 
-[https://anina1999.github.io/Quiz-app/](https://anina1999.github.io/Quiz-app/)
+## Структура
 
-## LICENSE
+```
+src/
+  api/          заявките към базата, групирани по тема — страниците не викат supabase пряко
+  components/   споделен UI (Alert, Field, Badge, ProgressBar…)
+  game/         логиката на самия тест (useQuizGame) отделно от изгледа
+  hooks/        useAsync (зареждане/грешка/резултат), useFeedback (съобщения)
+  lib/          supabase клиент, сесия на учител, сесия на ученик, звуци, константи
+  pages/        по един файл на екран
+supabase/
+  migrations/   схема · RLS политики · SQL функции · права
+  tools/        SQL за проверка и поправка, пускат се в SQL Editor
+  dist/         слепените миграции (генерира се, не се следи от Git)
+scripts/        smoke-test.mjs (130 проверки) · bundle-sql.mjs
+legacy/         оригиналната версия с ванилен JavaScript
+```
 
-This project is open for educational use and personal learning.
+## Пускане
+
+```bash
+npm install
+cp .env.example .env.local     # попълни URL и anon ключа от Supabase
+npm run dev
+```
+
+### Настройка на базата
+
+Ако проектът е свързан със Supabase CLI:
+
+```bash
+npm run db:push
+```
+
+Иначе генерирай слепения файл и го постави наведнъж в **SQL Editor**:
+
+```bash
+npm run db:bundle    # -> supabase/dist/full-schema.sql
+```
+
+Файлът се генерира при поискване и **не се следи от Git**. Причината е
+практическа: копие в хранилището изостава от миграциите, а точно това веднъж
+вече доведе до пропусната промяна при пускане.
+
+### Проверка на базата
+
+В [`supabase/tools/`](supabase/tools/) има готови заявки за SQL Editor:
+
+| Файл | За какво |
+|---|---|
+| `verify.sql` | 20 проверки — таблици, RLS, политики, функции, права |
+| `fix-anon-grants.sql` | маха останали права на ролята `anon` |
+| `diagnose-anon.sql` | показва кой какви права е дал на `anon` |
+| `edited-questions.sql` | кога е редактиран всеки въпрос |
+
+След това в Supabase Dashboard:
+
+- `Authentication` → `Providers` → включи **Anonymous sign-ins** (нужно за
+  учениците)
+
+### Проверка
+
+```bash
+npx supabase start
+npm run test:smoke
+```
+
+Скриптът изиграва целия сценарий срещу локална база и проверява защитата — че
+дете не може да прочете верните отговори, чужди резултати или да си направи
+учителски профил, и че учител не вижда чуждите класове.
+
+## Деплой
+
+Публикуването става автоматично при всеки push към `main` чрез
+[GitHub Actions](.github/workflows/deploy.yml). Еднократна настройка:
+
+1. **Ключове.** Репото → `Settings` → `Secrets and variables` → `Actions` →
+   `New repository secret`. Добави двата:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+2. **Източник.** Репото → `Settings` → `Pages` → `Source`: **GitHub Actions**
+   (не „Deploy from a branch“).
+3. Push към `main`.
+
+Приложението се отваря на <https://anina1999.github.io/Quiz-app/>.
+
+> Anon ключът се вгражда в JavaScript файла и е видим за всеки посетител.
+> Това е по замисъл — той не дава достъп сам по себе си, достъпът се
+> ограничава от RLS политиките в базата. Държим го като secret само за да може
+> да се сменя без промяна в кода.
+
+Ако някой ден смениш хостинга (Netlify, Vercel, собствен домейн), пусни билда
+с `DEPLOY_BASE=/` — базовият път `/Quiz-app/` важи само за GitHub Pages.
+
+## Скриптове
+
+| Команда | Какво прави |
+|---|---|
+| `npm run dev` | сървър за разработка |
+| `npm run build` | производствен билд в `dist/` |
+| `npm run db:push` | пуска миграциите към свързания проект |
+| `npm run db:bundle` | слепва миграциите в един SQL файл |
+| `npm run test:smoke` | 130 проверки срещу локална Supabase |
+
+## Лиценз
+
+MIT — виж [LICENSE](LICENSE).
