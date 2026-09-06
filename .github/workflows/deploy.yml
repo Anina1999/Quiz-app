@@ -28,6 +28,19 @@ jobs:
                   node-version: 22
                   cache: npm
 
+            # Липсващ ключ не проваля билда — Vite просто слага празен низ и
+            # приложението гърми чак в браузъра на потребителя, с бял екран и
+            # зелен CI. Затова спираме тук, преди да сме публикували нещо.
+            # Стойностите не се отпечатват, само дали изобщо ги има.
+            - name: Проверка на ключовете
+              env:
+                  URL: ${{ secrets.VITE_SUPABASE_URL }}
+                  KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+              run: |
+                  test -n "$URL" || { echo "::error::Липсва secret VITE_SUPABASE_URL. Добави го в Settings -> Secrets and variables -> Actions -> Repository secrets."; exit 1; }
+                  test -n "$KEY" || { echo "::error::Липсва secret VITE_SUPABASE_ANON_KEY. Добави го в Settings -> Secrets and variables -> Actions -> Repository secrets."; exit 1; }
+                  echo "Двата ключа са налице."
+
             - name: Инсталиране на зависимостите
               run: npm ci
 
