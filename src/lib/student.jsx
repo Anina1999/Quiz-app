@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from './supabase.js';
 import * as play from '../api/play.js';
 
@@ -43,6 +43,20 @@ export function StudentProvider({ children }) {
     const [student, setStudent] = useState(() => readStored());
     const [ready, setReady] = useState(false);
 
+    /*
+     * Изходът, докато мрежовата заявка още тече.
+     *
+     * signOut() не е мигновен. Ако детето натисне „Аз съм ученик“, преди той да
+     * е приключил, getSession() в ensureSession() още връща СТАРАТА сесия, нова
+     * анонимна не се създава — и миг по-късно signOut() премахва и старата.
+     * Формата излиза наглед готова, но първата заявка тръгва без сесия и базата
+     * отговаря с „permission denied for function class_preview“, защото вижда
+     * роля anon вместо authenticated.
+     *
+     * Затова ensureSession() изчаква тук, преди изобщо да погледне сесията.
+     */
+    const signingOut = useRef(null);
+
     // Ако някой влезе като учител, ученическата сесия отпада.
     useEffect(() => {
         const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -62,6 +76,16 @@ export function StudentProvider({ children }) {
      * приложението. Иначе учителят щеше да бъде изхвърлян при всяко отваряне.
      */
     const ensureSession = useCallback(async () => {
+        // Предишният изход може още да тече — виж `signingOut`. Без това
+        // изчакване проверката по-долу гледа сесия, която ще изчезне.
+        if (signingOut.current) {
+            try {
+                await signingOut.current;
+            } catch {
+                /* провален изход: състоянието се проверява наново по-долу */
+            }
+        }
+
         const { data } = await supabase.auth.getSession();
 
         // Учителска сесия на същото устройство: прекратяваме я, преди детето
@@ -92,9 +116,17 @@ export function StudentProvider({ children }) {
         writeStored(null);
         setStudent(null);
         setReady(false);
+
         // Прекратяваме и анонимната сесия, за да получи следващото дете на
-        // същото устройство нова самоличност.
-        await supabase.auth.signOut();
+        // същото устройство нова самоличност. Заявката се запомня, за да може
+        // ensureSession() да я изчака, ако детето влезе наново веднага.
+        const done = supabase.auth.signOut();
+        signingOut.current = done;
+        try {
+            await done;
+        } finally {
+            if (signingOut.current === done) signingOut.current = null;
+        }
     }, []);
 
     const value = useMemo(

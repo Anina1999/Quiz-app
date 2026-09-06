@@ -42,6 +42,11 @@ export function errorText(error, fallback = 'Нещо се обърка. Опи�
     if (/Password should be at least/i.test(raw)) {
         return 'Паролата трябва да е поне 8 знака.';
     }
+    // Базата вижда роля `anon` вместо `authenticated` — тоест заявката тръгва
+    // без сесия. За детето това е „влизането изтече“, а не липсващи права.
+    if (/permission denied for function/i.test(raw)) {
+        return 'Влизането изтече. Опресни страницата и опитай пак.';
+    }
     if (/Anonymous sign-ins are disabled/i.test(raw)) {
         return 'Анонимното влизане е изключено в Supabase. Включи го от Authentication → Providers.';
     }
