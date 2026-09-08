@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth.jsx';
 import { useFeedback } from '../hooks/useFeedback.js';
-import { Feedback, TextField } from '../components/ui.jsx';
+import { BackButton, Feedback, TextField } from '../components/ui.jsx';
 
 export default function TeacherLogin() {
     const { session, teacher, signIn, signUp } = useAuth();
@@ -41,7 +41,11 @@ export default function TeacherLogin() {
     const isSignUp = mode === 'signup';
 
     return (
-        <div className="page page--narrow">
+        <div className="page page--narrow stack">
+            {/* Изход обратно към „Кой си ти?“ — учител, попаднал тук по погрешка,
+                иначе няма как да се върне освен с бутона на браузъра. */}
+            <BackButton to="/" />
+
             <div className="card stack">
                 <h1>{isSignUp ? 'Регистрация на учител' : 'Вход за учители'}</h1>
 

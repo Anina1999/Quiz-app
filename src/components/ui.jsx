@@ -98,6 +98,31 @@ export function QuizBadge({ quiz }) {
     return <Badge kind="ok">Публикуван</Badge>;
 }
 
+/**
+ * Стрелка назад — цял бутон, не текстова връзка.
+ *
+ * Ползва се по екраните, до които се стига от началния („Кой си ти?“): вход за
+ * учители и влизане на ученик. Размерът е на бутон (56px), защото на детските
+ * екрани пръст върху таблет не улучва ред текст.
+ *
+ * С `to` е връзка към адрес, с `onClick` — връщане една стъпка назад в рамките
+ * на същия екран. Стои винаги горе вляво, за да е на едно и също място.
+ */
+export function BackButton({ to, onClick, children = 'Назад' }) {
+    if (to) {
+        return (
+            <Link to={to} className="btn btn--secondary">
+                ← {children}
+            </Link>
+        );
+    }
+    return (
+        <button type="button" className="btn btn--secondary" onClick={onClick}>
+            ← {children}
+        </button>
+    );
+}
+
 export function BackLink({ to = '/teacher', children = '← Обратно към таблото' }) {
     return (
         <p className="small">
