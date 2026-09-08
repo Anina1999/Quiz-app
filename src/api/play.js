@@ -22,6 +22,14 @@ export const myQuizzes = (studentId) => rpc('student_quizzes', { p_student_id: s
 /** Личният напредък по учебен предмет. */
 export const myProgress = (studentId) => rpc('student_progress', { p_student_id: studentId });
 
+/**
+ * Тече ли час в момента.
+ *
+ * Тестовете се решават само в час. Питаме базата, за да обясним това на детето
+ * ПРЕДИ да натисне — иначе стига до грешка, без да разбира защо.
+ */
+export const lessonState = (studentId) => rpc('student_lesson_state', { p_student_id: studentId });
+
 /** Стартира опит и връща въпросите — без полето is_correct. */
 export const startAttempt = (studentId, quizId) =>
     rpc('start_attempt', { p_student_id: studentId, p_quiz_id: quizId });

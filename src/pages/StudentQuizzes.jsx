@@ -11,19 +11,34 @@ export default function StudentQuizzes() {
         async () => ({
             quizzes: await api.play.myQuizzes(student.id),
             progress: await api.play.myProgress(student.id),
+            lesson: await api.play.lessonState(student.id),
         }),
         [student.id]
     );
 
     if (loading) return <Loading />;
 
-    const { quizzes = [], progress = [] } = data ?? {};
+    const { quizzes = [], progress = [], lesson } = data ?? {};
+
+    // Сесията на детето живее часове, а записът на устройството — още повече.
+    // Затова списъкът може да се отвори и вечерта вкъщи. Тестовете се решават
+    // в час; тук го казваме направо, вместо да оставим детето да натисне и да
+    // получи грешка от базата.
+    const lessonOpen = Boolean(lesson?.open);
+
 
     return (
         <div className="page stack">
             <h1>Здравей, {student.display_name}! 👋</h1>
 
             <Feedback error={error} />
+
+            {!lessonOpen && (
+                <p className="alert alert--info" role="status">
+                    ⏸ <strong>Часът не е започнал.</strong> Тестовете се решават в клас — учителят
+                    ще отвори часа. Дотогава можеш да разгледаш как се справяш.
+                </p>
+            )}
 
             <h2>Тестове за теб</h2>
             {quizzes.length === 0 && <p className="alert alert--info">Няма нови тестове. Попитай учителя.</p>}
@@ -50,7 +65,12 @@ export default function StudentQuizzes() {
                                     <Badge>Още не си го решавал</Badge>
                                 )}
                             </span>
-                            {!q.can_start && (
+                            {/* Причината плочката да не се натиска е важна:
+                                „предаден“ и „часът не е започнал“ са различни
+                                неща за детето. Извън час обяснението е горе,
+                                едно за целия списък, за да не се повтаря на
+                                всяка плочка. */}
+                            {!q.can_start && lessonOpen && !q.is_practice && (
                                 <span className="small muted">Този тест вече е предаден.</span>
                             )}
                         </>
