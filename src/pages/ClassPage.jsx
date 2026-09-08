@@ -37,6 +37,10 @@ export default function ClassPage() {
 
     const { klass, students, progress, attempts } = data;
 
+    // Отметката „няма го този час“ се закача за конкретния час, затова има
+    // смисъл само докато той тече.
+    const lessonOpen = api.classes.isJoiningOpen(klass);
+
     async function addStudent(e) {
         e.preventDefault();
         const { ok } = await feedback.act(() => api.students.create({ classId, ...draft }));
@@ -50,6 +54,36 @@ export default function ClassPage() {
         const { ok } = await feedback.act(
             () => api.students.releaseSession(id),
             `„${name}“ вече може да влезе от друго устройство.`
+        );
+        if (ok) reload();
+    }
+
+    /*
+     * Отсъстващото дете може да влезе в класа, но не може да започне тест —
+     * иначе решава от вкъщи заедно с класа.
+     *
+     * Двата случая са различни нарочно: „отсъства от училище“ важи до
+     * връщането (иначе на другия ден болното дете пак може да мами), а „няма
+     * го този час“ пада от само себе си при следващия час.
+     */
+    async function toggleAbsent(s) {
+        const absent = !api.students.isAbsent(s);
+        const { ok } = await feedback.act(
+            () => api.students.setAbsent(s.id, absent),
+            absent
+                ? `„${s.display_name}“ отсъства. Тестовете му остават заключени, докато не го върнеш.`
+                : `„${s.display_name}“ се върна и отново може да решава.`
+        );
+        if (ok) reload();
+    }
+
+    async function toggleAbsentThisLesson(s) {
+        const absent = !api.students.isAbsentThisLesson(s, klass);
+        const { ok } = await feedback.act(
+            () => api.students.setAbsentThisLesson(s.id, absent),
+            absent
+                ? `„${s.display_name}“ е извън този час. Следващият час пак ще може.`
+                : `„${s.display_name}“ отново решава в този час.`
         );
         if (ok) reload();
     }
@@ -111,6 +145,16 @@ export default function ClassPage() {
                     „№ 12“. Приложението нарочно не съхранява имена на деца. Кой псевдоним на кое дете
                     отговаря, знаеш само ти — в дневника.
                 </p>
+                <p className="alert alert--info">
+                    Отсъстващото дете може да влезе с кода, но тестът му остава заключен — така не го
+                    решава от вкъщи заедно с класа. Има два случая:
+                    <br />
+                    <strong>🚫 Отсъства</strong> — няма го от училище. Важи до деня, в който отбележиш,
+                    че се е върнало. Не пада само.
+                    <br />
+                    <strong>⏸ Няма го този час</strong> — на училище е, но този час е другаде. Пада от
+                    само себе си при следващия час.
+                </p>
 
                 {students.length > 0 && (
                     <div className="table-wrap">
@@ -121,6 +165,7 @@ export default function ClassPage() {
                                     <th scope="col">№</th>
                                     <th scope="col">Псевдоним</th>
                                     <th scope="col">В момента</th>
+                                    <th scope="col">Присъствие</th>
                                     <th scope="col">
                                         <span className="sr-only">Действия</span>
                                     </th>
@@ -135,6 +180,61 @@ export default function ClassPage() {
                                             <Badge kind={s.session_uid ? 'ok' : 'muted'}>
                                                 {s.session_uid ? 'на устройство' : 'свободен'}
                                             </Badge>
+                                        </td>
+                                        <td>
+                                            {api.students.isAbsent(s) ? (
+                                                // Показваме от колко дни го няма — така не остава
+                                                // заключен, защото учителят е забравил да го върне.
+                                                <div
+                                                    className="row"
+                                                    style={{ gap: 8 }}
+                                                    title={api.students.absentSinceLabel(s)}
+                                                >
+                                                    <Badge
+                                                        kind={
+                                                            api.students.isLongAbsence(s)
+                                                                ? 'warn'
+                                                                : 'muted'
+                                                        }
+                                                    >
+                                                        {api.students.absentLabel(s)}
+                                                    </Badge>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn--quiet"
+                                                        onClick={() => toggleAbsent(s)}
+                                                    >
+                                                        ↩ Върна се
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="row" style={{ gap: 8 }}>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn--quiet"
+                                                        onClick={() => toggleAbsent(s)}
+                                                    >
+                                                        🚫 Отсъства
+                                                    </button>
+                                                    {/* Само докато тече час — отметка за час, който
+                                                        не е започнал, не важи за нищо. */}
+                                                    {lessonOpen && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn--quiet"
+                                                            onClick={() => toggleAbsentThisLesson(s)}
+                                                            aria-pressed={api.students.isAbsentThisLesson(
+                                                                s,
+                                                                klass
+                                                            )}
+                                                        >
+                                                            {api.students.isAbsentThisLesson(s, klass)
+                                                                ? '↩ Върни в часа'
+                                                                : '⏸ Няма го този час'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
                                         </td>
                                         <td>
                                             <div className="row" style={{ gap: 8 }}>

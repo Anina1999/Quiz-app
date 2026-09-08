@@ -26,6 +26,14 @@ export default function StudentQuizzes() {
     // получи грешка от базата.
     const lessonOpen = Boolean(lesson?.open);
 
+    // Учителят е отбелязал детето като отсъстващо. То може да влезе, но тестът
+    // е заключен — иначе би го решило от вкъщи заедно с класа.
+    //
+    // Двата случая искат различен текст: „когато се върнеш“ при отсъствие от
+    // училище, „следващия път“ при пропуснат един час. Тонът е важен и в двата:
+    // детето не е наказано, тестът просто го чака.
+    const absent = Boolean(lesson?.absent);
+    const absentKind = lesson?.absent_kind;
 
     return (
         <div className="page stack">
@@ -33,11 +41,25 @@ export default function StudentQuizzes() {
 
             <Feedback error={error} />
 
-            {!lessonOpen && (
-                <p className="alert alert--info" role="status">
-                    ⏸ <strong>Часът не е започнал.</strong> Тестовете се решават в клас — учителят
-                    ще отвори часа. Дотогава можеш да разгледаш как се справяш.
-                </p>
+            {absent ? (
+                absentKind === 'lesson' ? (
+                    <p className="alert alert--info" role="status">
+                        ⏸ <strong>Този час не си в клас.</strong> Тестът те чака за следващия път.
+                        Дотогава можеш да разгледаш как се справяш.
+                    </p>
+                ) : (
+                    <p className="alert alert--info" role="status">
+                        🏠 <strong>Не си в клас.</strong> Тестът те чака — ще го решиш, когато се
+                        върнеш. Дотогава можеш да разгледаш как се справяш.
+                    </p>
+                )
+            ) : (
+                !lessonOpen && (
+                    <p className="alert alert--info" role="status">
+                        ⏸ <strong>Часът не е започнал.</strong> Тестовете се решават в клас —
+                        учителят ще отвори часа. Дотогава можеш да разгледаш как се справяш.
+                    </p>
+                )
             )}
 
             <h2>Тестове за теб</h2>
@@ -70,7 +92,14 @@ export default function StudentQuizzes() {
                                 неща за детето. Извън час обяснението е горе,
                                 едно за целия списък, за да не се повтаря на
                                 всяка плочка. */}
-                            {!q.can_start && lessonOpen && !q.is_practice && (
+                            {absent && !done && (
+                                <span className="small muted">
+                                    {absentKind === 'lesson'
+                                        ? 'Предстои да го решиш следващия час.'
+                                        : 'Предстои да го решиш, когато се върнеш в клас.'}
+                                </span>
+                            )}
+                            {!q.can_start && !absent && lessonOpen && !q.is_practice && (
                                 <span className="small muted">Този тест вече е предаден.</span>
                             )}
                         </>
