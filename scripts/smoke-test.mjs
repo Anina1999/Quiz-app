@@ -282,6 +282,98 @@ const myQuizzes = await child.rpc('student_quizzes', { p_student_id: target.id }
 check('вижда публикувания тест', myQuizzes.data?.length === 1, myQuizzes.error?.message);
 check('не вижда непубликуваната чернова', !myQuizzes.data?.some((q) => q.title === 'Празен тест'));
 
+const openLesson = await child.rpc('student_lesson_state', { p_student_id: target.id });
+check('докато часът тече, детето вижда, че е отворен', openLesson.data?.open === true, JSON.stringify(openLesson.data));
+check('в час тестът се води достъпен', myQuizzes.data?.[0]?.can_start === true, JSON.stringify(myQuizzes.data));
+
+// --- Отсъстващото дете не решава от вкъщи ------------------------------------
+// Часът ТЕЧЕ, прозорецът е отворен, детето знае кода — но си е вкъщи. Точно
+// сценарият, който прозорецът за влизане не покрива.
+await teacher.rpc('set_absent', { p_student_id: target.id, p_absent: true });
+
+const absentState = await child.rpc('student_lesson_state', { p_student_id: target.id });
+check(
+    'отсъстващото дете вижда, че е отбелязано',
+    absentState.data?.absent === true && absentState.data?.open === true,
+    JSON.stringify(absentState.data)
+);
+check('причината е „отсъства от училище“', absentState.data?.absent_kind === 'days');
+
+const absentList = await child.rpc('student_quizzes', { p_student_id: target.id });
+check(
+    'на отсъстващо дете тестът не се води достъпен',
+    absentList.data?.every((q) => q.can_start === false),
+    JSON.stringify(absentList.data)
+);
+
+checkBlocked(
+    'отсъстващо дете не може да започне тест, макар часът да тече',
+    await child.rpc('start_attempt', { p_student_id: target.id, p_quiz_id: quiz.data.id })
+);
+
+// НАЙ-ВАЖНАТА проверка тук: дългото отсъствие НЕ изтича на другия ден. Ако
+// изтичаше, болното дете щеше да е „присъстващо“ по подразбиране и щеше да
+// реши теста от леглото. Премятаме отметката седмица назад.
+await admin
+    .from('students')
+    .update({ absent_since: '2020-01-01' })
+    .eq('id', target.id);
+
+checkBlocked(
+    'отсъствието НЕ изтича само — и след дни тестът е заключен',
+    await child.rpc('start_attempt', { p_student_id: target.id, p_quiz_id: quiz.data.id })
+);
+
+// Детето се връща в клас — тестът пак е негов.
+await teacher.rpc('set_absent', { p_student_id: target.id, p_absent: false });
+const backList = await child.rpc('student_quizzes', { p_student_id: target.id });
+check(
+    'след връщане в клас тестът пак е достъпен',
+    backList.data?.[0]?.can_start === true,
+    JSON.stringify(backList.data)
+);
+
+// --- На училище е, но точно този час го няма --------------------------------
+await teacher.rpc('set_absent_this_lesson', { p_student_id: target.id, p_absent: true });
+
+const missState = await child.rpc('student_lesson_state', { p_student_id: target.id });
+check('причината е „няма го този час“', missState.data?.absent_kind === 'lesson', JSON.stringify(missState.data));
+
+checkBlocked(
+    'дете извън този час не може да започне теста му',
+    await child.rpc('start_attempt', { p_student_id: target.id, p_quiz_id: quiz.data.id })
+);
+
+// Нов час — отметката за миналия час не важи за него. Детето е на училище и
+// следващият тест му е достъпен.
+await expireLesson(klass.data.id);
+await teacher.rpc('open_class', { p_class_id: klass.data.id, p_minutes: 45 });
+
+const nextLesson = await child.rpc('student_lesson_state', { p_student_id: target.id });
+check(
+    'при следващия час отметката вече не важи',
+    nextLesson.data?.absent === false,
+    JSON.stringify(nextLesson.data)
+);
+
+const nextList = await child.rpc('student_quizzes', { p_student_id: target.id });
+check(
+    'следващия час тестът пак е достъпен',
+    nextList.data?.[0]?.can_start === true,
+    JSON.stringify(nextList.data)
+);
+
+checkBlocked(
+    'отсъствие от час не се отбелязва, докато час не тече',
+    await (async () => {
+        await expireLesson(klass.data.id);
+        return teacher.rpc('set_absent_this_lesson', { p_student_id: target.id, p_absent: true });
+    })()
+);
+
+// Връщаме класа в отворено състояние за следващите секции.
+await teacher.rpc('open_class', { p_class_id: klass.data.id, p_minutes: 45 });
+
 const attempt = await child.rpc('start_attempt', {
     p_student_id: target.id,
     p_quiz_id: quiz.data.id,
@@ -485,6 +577,11 @@ checkBlocked(
         .update({ session_uid: null })
         .eq('id', otherStudent.id)
         .select('id')
+);
+
+checkBlocked(
+    'чужд учител не може да отмята отсъствия в чужд клас',
+    await other.rpc('set_absent', { p_student_id: otherStudent.id, p_absent: true })
 );
 
 // Освободеният псевдоним пак е свободен за избор.
@@ -741,6 +838,32 @@ check(
 // Времето на часа изтича, докато детето още решава.
 await expireLesson(klass.data.id);
 
+// --- Тестът се решава в час, а не от вкъщи -----------------------------------
+// Сесията на детето е жива (localStorage + анонимна сесия го надживяват часа),
+// но часът е свършил. Точно това е сценарият „дете отваря приложението вечерта
+// вкъщи“ — и точно тук трябва да не може нищо да започне.
+const homeLesson = await graceChild.rpc('student_lesson_state', { p_student_id: otherStudent.id });
+check(
+    'извън час детето вижда, че часът е затворен',
+    homeLesson.data?.open === false,
+    JSON.stringify(homeLesson.data)
+);
+
+const homeList = await graceChild.rpc('student_quizzes', { p_student_id: otherStudent.id });
+check(
+    'извън час нито един тест не се води достъпен',
+    homeList.data?.length > 0 && homeList.data.every((q) => q.can_start === false),
+    JSON.stringify(homeList.data)
+);
+
+checkBlocked(
+    'извън час детето не може да започне тест от вкъщи',
+    await graceChild.rpc('start_attempt', {
+        p_student_id: otherStudent.id,
+        p_quiz_id: quiz.data.id,
+    })
+);
+
 // Учителят вижда, че има кого да изчака, и получава въпроса за гратиса.
 const lessonState = await teacher.rpc('class_lesson_state', { p_class_id: klass.data.id });
 check('часът се води приключен', lessonState.data?.phase === 'expired', JSON.stringify(lessonState.data));
@@ -965,6 +1088,154 @@ check(
     'архивираният тест изчезва от списъка на детето',
     !afterArchive.data?.some((q) => q.id === quiz.data.id),
     JSON.stringify(afterArchive.data)
+);
+
+// =============================================================================
+console.log('\n\x1b[1m11б. Архивът прескача отсъстващите\x1b[0m');
+// =============================================================================
+// Дълго отсъстващо дете не бива да задържа решения тест в списъка на класа —
+// но и не бива да го губи. Проверяваме двете наведнъж.
+//
+// В този момент клиентът `child` държи „Ученик 3“ (third), а `graceChild` —
+// „Ученик 2“ (otherStudent). „Ученик 1“ няма активна сесия и затова се
+// отбелязва като отсъстващ заедно с „Ученик 2“.
+
+// Тестът се създава при ЗАТВОРЕН час — редакцията е заключена, докато тече час.
+await expireLesson(klass.data.id);
+
+const solo = await teacher
+    .from('quizzes')
+    .insert({
+        teacher_id: teacherId,
+        class_id: klass.data.id,
+        title: 'Тест за отсъстващо дете',
+        subject: 'Математика',
+        grade: 2,
+    })
+    .select('id')
+    .single();
+check('създаден е тест за проверката', !!solo.data?.id, solo.error?.message);
+
+const soloQ = await teacher
+    .from('questions')
+    .insert({ quiz_id: solo.data.id, prompt: '1 + 1 = ?', position: 0 })
+    .select('id')
+    .single();
+check('добавен е въпрос', !!soloQ.data?.id, soloQ.error?.message);
+
+await teacher.from('answers').insert([
+    { question_id: soloQ.data.id, text: '2', is_correct: true, position: 0 },
+    { question_id: soloQ.data.id, text: '3', is_correct: false, position: 1 },
+]);
+const soloPub = await teacher.rpc('publish_quiz', { p_quiz_id: solo.data.id, p_publish: true });
+check('тестът е публикуван', !!soloPub.data, soloPub.error?.message);
+
+// Двете деца без активна сесия отсъстват; решава само „Ученик 3“.
+await teacher.rpc('set_absent', { p_student_id: target.id, p_absent: true });
+await teacher.rpc('set_absent', { p_student_id: otherStudent.id, p_absent: true });
+
+await teacher.rpc('open_class', { p_class_id: klass.data.id, p_minutes: 45 });
+
+const soloAttempt = await child.rpc('start_attempt', {
+    p_student_id: third.id,
+    p_quiz_id: solo.data.id,
+});
+check('присъстващото дете решава теста', !!soloAttempt.data?.attempt_id, soloAttempt.error?.message);
+await child.rpc('finish_attempt', { p_attempt_id: soloAttempt.data.attempt_id });
+
+await expireLesson(klass.data.id);
+await teacher.rpc('open_class', { p_class_id: klass.data.id, p_minutes: 45 });
+
+const soloState = await teacher
+    .from('quizzes')
+    .select('archived_at, auto_archived')
+    .eq('id', solo.data.id)
+    .single();
+check(
+    'тестът се архивира, без да чака отсъстващите',
+    soloState.data?.archived_at !== null && soloState.data?.auto_archived === true,
+    JSON.stringify(soloState.data)
+);
+
+const solvedView = await child.rpc('student_quizzes', { p_student_id: third.id });
+check(
+    'за решилото го дете тестът изчезва от списъка',
+    !solvedView.data?.some((q) => q.id === solo.data.id),
+    JSON.stringify(solvedView.data)
+);
+
+// Детето се връща и намира теста си на мястото му.
+await teacher.rpc('set_absent', { p_student_id: otherStudent.id, p_absent: false });
+const backView = await graceChild.rpc('student_quizzes', { p_student_id: otherStudent.id });
+check(
+    'върналото се дете още вижда архивирания тест',
+    backView.data?.find((q) => q.id === solo.data.id)?.can_start === true,
+    JSON.stringify(backView.data)
+);
+
+const lateSolve = await graceChild.rpc('start_attempt', {
+    p_student_id: otherStudent.id,
+    p_quiz_id: solo.data.id,
+});
+check('и го решава след архивирането', !!lateSolve.data?.attempt_id, lateSolve.error?.message);
+if (lateSolve.data?.attempt_id) {
+    await graceChild.rpc('finish_attempt', { p_attempt_id: lateSolve.data.attempt_id });
+}
+
+const doneView = await graceChild.rpc('student_quizzes', { p_student_id: otherStudent.id });
+check(
+    'след като го реши, тестът изчезва и от неговия списък',
+    !doneView.data?.some((q) => q.id === solo.data.id),
+    JSON.stringify(doneView.data)
+);
+
+// Ръчният архив остава ТВЪРД: скрива теста дори от онзи, който не го е решил.
+// Затова се проверява с НОВ тест, който никой не е решавал.
+await expireLesson(klass.data.id);
+
+const withdrawn = await teacher
+    .from('quizzes')
+    .insert({
+        teacher_id: teacherId,
+        class_id: klass.data.id,
+        title: 'Сгрешен тест за изтегляне',
+        subject: 'Математика',
+        grade: 2,
+    })
+    .select('id')
+    .single();
+const withdrawnQ = await teacher
+    .from('questions')
+    .insert({ quiz_id: withdrawn.data.id, prompt: '2 + 2 = ?', position: 0 })
+    .select('id')
+    .single();
+await teacher.from('answers').insert([
+    { question_id: withdrawnQ.data.id, text: '4', is_correct: true, position: 0 },
+    { question_id: withdrawnQ.data.id, text: '5', is_correct: false, position: 1 },
+]);
+await teacher.rpc('publish_quiz', { p_quiz_id: withdrawn.data.id, p_publish: true });
+
+const manual = await teacher
+    .from('quizzes')
+    .update({ archived_at: new Date().toISOString(), auto_archived: false })
+    .eq('id', withdrawn.data.id)
+    .select('id')
+    .single();
+check('учителят изтегля тест ръчно', !!manual.data?.id, manual.error?.message);
+
+await teacher.rpc('open_class', { p_class_id: klass.data.id, p_minutes: 45 });
+await teacher.rpc('set_absent', { p_student_id: target.id, p_absent: false });
+
+const manualView = await child.rpc('student_quizzes', { p_student_id: third.id });
+check(
+    'ръчно изтеглен тест е скрит и за нерешилите',
+    !manualView.data?.some((q) => q.id === withdrawn.data.id),
+    JSON.stringify(manualView.data)
+);
+
+checkBlocked(
+    'ръчно изтеглен тест не се стартира',
+    await child.rpc('start_attempt', { p_student_id: third.id, p_quiz_id: withdrawn.data.id })
 );
 
 checkBlocked(

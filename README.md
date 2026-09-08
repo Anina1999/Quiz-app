@@ -54,7 +54,7 @@ supabase/
   migrations/   схема · RLS политики · SQL функции · права
   tools/        SQL за проверка и поправка, пускат се в SQL Editor
   dist/         слепените миграции (генерира се, не се следи от Git)
-scripts/        smoke-test.mjs (130 проверки) · bundle-sql.mjs
+scripts/        smoke-test.mjs (159 проверки) · bundle-sql.mjs
 legacy/         оригиналната версия с ванилен JavaScript
 ```
 
@@ -142,7 +142,7 @@ npm run test:smoke
 | `npm run build` | производствен билд в `dist/` |
 | `npm run db:push` | пуска миграциите към свързания проект |
 | `npm run db:bundle` | слепва миграциите в един SQL файл |
-| `npm run test:smoke` | 130 проверки срещу локална Supabase |
+| `npm run test:smoke` | 159 проверки срещу локална Supabase |
 
 ## Лиценз
 

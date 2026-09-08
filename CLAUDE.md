@@ -93,7 +93,7 @@ legacy/         оригиналната версия с ванилен JavaScri
 | `npm run build` | производствен билд |
 | `npm run db:push` | пуска миграциите към свързания проект |
 | `npm run db:bundle` | слепва миграциите в един SQL файл |
-| `npm run test:smoke` | 130 проверки срещу локална Supabase (`npx supabase start` първо) |
+| `npm run test:smoke` | 159 проверки срещу локална Supabase (`npx supabase start` първо) |
 
 След промяна в SQL: пусни `npm run test:smoke`. Той проверява и защитата — че
 дете не може да прочете верните отговори или чужди резултати.
