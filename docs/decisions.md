@@ -39,6 +39,8 @@
 | [0016](decisions/0016-printable-attempt-report.md) | Протоколът е страница за печат, не PDF библиотека | документация |
 | [0017](decisions/0017-bundled-sql-is-generated-not-committed.md) | Слепеният SQL се генерира, не се пази в Git | процес |
 | [0025](decisions/0025-all-rights-reserved.md) | Всички права запазени вместо MIT | лиценз |
+| [0026](decisions/0026-absent-students-cannot-take-the-test.md) | Отсъстващото дете влиза, но тестът му е заключен | час |
+| [0027](decisions/0027-archive-skips-absent-students.md) | Архивът прескача отсъстващите | час |
 
 ## Предложени — от плана, чакат одобрение
 
@@ -50,6 +52,7 @@
 | [0023](decisions/0023-gamification-without-comparing-children.md) | Геймификация без класация между децата | 1 |
 | [0021](decisions/0021-sen-profile-per-student.md) | Диференциацията е свойство на ученика, не на теста | 2 |
 | [0024](decisions/0024-progress-by-topic-not-only-subject.md) | Напредъкът се мери по тема, не само по предмет | 2 |
+| [0028](decisions/0028-review-only-during-the-lesson.md) | Преглед на решен тест — само в час и по избор на учителя | 2 |
 | [0022](decisions/0022-offline-only-for-practice.md) | Офлайн игра само за упражнение | 3 |
 
 ## Кои решения не се пипат без изричен разговор
