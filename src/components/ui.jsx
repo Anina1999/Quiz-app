@@ -92,6 +92,10 @@ export function Badge({ kind, children }) {
  * да е публикуван — затова архивът е първи.
  */
 export function QuizBadge({ quiz }) {
+    // Автоматичният архив не е същото като ръчния: тестът е свършил работа за
+    // класа, но още стои пред децата, които не са го решили (напр. дълго
+    // отсъстващо дете). Учителят трябва да вижда разликата.
+    if (quiz.archived_at && quiz.auto_archived) return <Badge kind="muted">Приключен</Badge>;
     if (quiz.archived_at) return <Badge kind="muted">В архива</Badge>;
     if (!quiz.is_published) return <Badge kind="muted">Чернова</Badge>;
     if (quiz.is_practice) return <Badge kind="ok">Упражнение</Badge>;

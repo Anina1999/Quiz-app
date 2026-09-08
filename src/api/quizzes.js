@@ -1,7 +1,7 @@
 import { run, rpc, supabase } from './client.js';
 
 const COLUMNS =
-    'id, title, subject, grade, class_id, time_per_question, shuffle_questions, questions_per_attempt, is_published, is_practice, archived_at, created_at, updated_at';
+    'id, title, subject, grade, class_id, time_per_question, shuffle_questions, questions_per_attempt, is_published, is_practice, archived_at, auto_archived, created_at, updated_at';
 
 /** Тест, който децата още виждат — публикуван и неархивиран. */
 export const isActive = (quiz) => Boolean(quiz?.is_published) && !quiz?.archived_at;
@@ -64,13 +64,28 @@ export const remove = (quizId) => run(supabase.from('quizzes').delete().eq('id',
  * решаване от всички отбележи теста като упражнение.
  */
 export const unarchive = (quizId) =>
-    run(supabase.from('quizzes').update({ archived_at: null }).eq('id', quizId).select(COLUMNS).single());
+    run(
+        supabase
+            .from('quizzes')
+            .update({ archived_at: null, auto_archived: false })
+            .eq('id', quizId)
+            .select(COLUMNS)
+            .single()
+    );
 
+/**
+ * РЪЧЕН архив — скрива теста от всички, включително от децата, които още не са
+ * го решили. Това е твърдата спирачка: „тестът е сгрешен“, „не ни трябва“.
+ *
+ * Различава се от автоматичния архив (`auto_archived`), който се задейства при
+ * нов час и оставя теста видим за онзи, който не го е решил — например дълго
+ * отсъстващо дете.
+ */
 export const archive = (quizId) =>
     run(
         supabase
             .from('quizzes')
-            .update({ archived_at: new Date().toISOString() })
+            .update({ archived_at: new Date().toISOString(), auto_archived: false })
             .eq('id', quizId)
             .select(COLUMNS)
             .single()
