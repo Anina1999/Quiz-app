@@ -4,6 +4,43 @@ import { useStudent } from '../lib/student.jsx';
 import { useAsync } from '../hooks/useAsync.js';
 import { Badge, Feedback, Loading, ProgressBar } from '../components/ui.jsx';
 
+/**
+ * Редът над списъка: защо тестовете са заключени в момента.
+ *
+ * Обещанието „тестът те чака“ се дава само когато наистина има какво да се
+ * решава. Дете, което вече е решило всичко, го четеше и се питаше кой тест го
+ * чака — съобщението му обещаваше нещо, което го няма. Затова текстът зависи и
+ * от `pending`.
+ *
+ * Упражнението се брои за чакащо: то се решава колкото пъти детето поиска.
+ */
+function lessonNotice({ absent, absentKind, lessonOpen, pending }) {
+    if (absent) {
+        const lesson = absentKind === 'lesson';
+        return {
+            emoji: lesson ? '⏸' : '🏠',
+            headline: lesson ? 'Този час не си в клас.' : 'Не си в клас.',
+            body: !pending
+                ? 'Решил си всичко засега.'
+                : lesson
+                  ? 'Тестът те чака за следващия час.'
+                  : 'Тестът те чака — ще го решиш, когато се върнеш в клас.',
+        };
+    }
+
+    if (!lessonOpen) {
+        return {
+            emoji: '⏸',
+            headline: 'Часът не е започнал.',
+            body: pending
+                ? 'Тестовете се решават в клас — учителят ще отвори часа.'
+                : 'Решил си всичко засега.',
+        };
+    }
+
+    return null;
+}
+
 export default function StudentQuizzes() {
     const { student } = useStudent();
 
@@ -35,31 +72,22 @@ export default function StudentQuizzes() {
     const absent = Boolean(lesson?.absent);
     const absentKind = lesson?.absent_kind;
 
+    const pending = quizzes.some((q) => q.is_practice || q.attempts_count === 0);
+    const notice = lessonNotice({ absent, absentKind, lessonOpen, pending });
+
     return (
         <div className="page stack">
             <h1>Здравей, {student.display_name}! 👋</h1>
 
             <Feedback error={error} />
 
-            {absent ? (
-                absentKind === 'lesson' ? (
-                    <p className="alert alert--info" role="status">
-                        ⏸ <strong>Този час не си в клас.</strong> Тестът те чака за следващия път.
-                        Дотогава можеш да разгледаш как се справяш.
-                    </p>
-                ) : (
-                    <p className="alert alert--info" role="status">
-                        🏠 <strong>Не си в клас.</strong> Тестът те чака — ще го решиш, когато се
-                        върнеш. Дотогава можеш да разгледаш как се справяш.
-                    </p>
-                )
-            ) : (
-                !lessonOpen && (
-                    <p className="alert alert--info" role="status">
-                        ⏸ <strong>Часът не е започнал.</strong> Тестовете се решават в клас —
-                        учителят ще отвори часа. Дотогава можеш да разгледаш как се справяш.
-                    </p>
-                )
+            {notice && (
+                <p className="alert alert--info" role="status">
+                    {notice.emoji} <strong>{notice.headline}</strong> {notice.body}
+                    {/* Поканата се дава само ако има към какво да прати детето —
+                        иначе сочи към секция, която изобщо не се показва. */}
+                    {progress.length > 0 && ' Можеш да разгледаш как се справяш.'}
+                </p>
             )}
 
             <h2>Тестове за теб</h2>
