@@ -41,6 +41,7 @@
 | [0025](decisions/0025-all-rights-reserved.md) | Всички права запазени вместо MIT | лиценз |
 | [0026](decisions/0026-absent-students-cannot-take-the-test.md) | Отсъстващото дете влиза, но тестът му е заключен | час |
 | [0027](decisions/0027-archive-skips-absent-students.md) | Архивът прескача отсъстващите | час |
+| [0029](decisions/0029-warm-palette-and-design-tokens.md) | Топла палитра и дизайн-токени; цвят и знак на всеки предмет | дизайн |
 
 ## Предложени — от плана, чакат одобрение
 

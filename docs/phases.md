@@ -29,7 +29,7 @@
 | # | Задача | Решение | Статус |
 |---|---|---|---|
 | M1 | Снимка към въпрос + Supabase Storage | [ADR-0018](decisions/0018-images-in-supabase-storage.md) | ☐ |
-| M2 | Детски визуален слой и дизайн-токени | — | ☐ |
+| M2 | Детски визуален слой и дизайн-токени | [ADR-0029](decisions/0029-warm-palette-and-design-tokens.md) | ◐ |
 | M3 | Маскот (SVG), реагиращ на отговорите | [ADR-0019](decisions/0019-inline-svg-illustrations.md) | ☐ |
 | M4 | Прочит на глас на въпроса и отговорите | [ADR-0020](decisions/0020-text-to-speech-for-early-readers.md) | ☐ |
 | M5 | Точки, серия, значки, награда накрая | [ADR-0023](decisions/0023-gamification-without-comparing-children.md) | ☐ |
